@@ -1,3 +1,11 @@
+/*
+Veterinaria con Firebase
+
+Integrantes:
+De la Cruz Yamahoka Daniela 19211624
+García Arellano Aracely 19211642
+
+*/
 var firebaseConfig = {
     apiKey: "AIzaSyAuKruUNzqS_bbFf_6Sez9kuF1djc_NwBI",
     authDomain: "proyectomascotasv1.firebaseapp.com",
@@ -8,10 +16,10 @@ var firebaseConfig = {
     appId: "1:547382970126:web:25fb7edf1adfede2d7f95f",
     measurementId: "G-2981K144LP"
 };
-// Initialize Firebase
+// Inicializa el Firebase
 firebase.initializeApp(firebaseConfig);
 
-
+//Funcion que limpia todos los campos 
 function resetFields(){
     document.getElementById("Input0").value='';
     document.getElementById("Input1").value='';
@@ -22,6 +30,7 @@ function resetFields(){
     document.getElementById("Input6").value='';
     document.getElementById("Input7").value='';
 }
+//Funcion que nos permite crear los registros de las mascotas 
 function createR() {
     document.getElementById("Input0").disabled = false;
     //Guardo los datos capturados usando el id de cada control
@@ -38,7 +47,7 @@ function createR() {
     if (id.length > 0) {
         //creo un objeto que guarda los datos
         var mascota = {
-            id, //matricula:id
+            id, 
             nombremascota,
             edad,
             especie,
@@ -49,7 +58,7 @@ function createR() {
         }
 
         firebase.database().ref('Mascotas/' + id).update(mascota).then(() => {
-           resetFields();
+           resetFields();//se reinician los campos cuando se hace la peticion
         }).then(()=>{
            read();
         });
@@ -61,64 +70,42 @@ function createR() {
     else {
         swal("Error", "Llena todos los campos","warning");
     }
-
+    //Evita que el id del mascota se desactive
     document.getElementById("Input0").disabled = false;
-        //firebase.database().ref('users/' + userId).set({
-    //    username: name,
-    //    email: email,
-    //    profile_picture : imageUrl
-    //  });
-    //https://firebase.google.com/docs/database/web/read-and-write?hl=es
-
-  
-    //Esto se usa cuando no tienen un id/matricula y Firebase les genera una
-    //automaticamente
-    //const key = firebase.database().ref().child('Alumnos').push().key;
-    //data[`Alumnos/${key}`]= alumno;
-    //firebase.database().ref().update(data).then(()=>{
-    //  alert('Agregado exitosamente');
-    //})
 }
-
+//Funcion que nos permite sobreescribir 
 function read(){
-    document.getElementById("Table1").innerHTML='';
 
+    document.getElementById("Table1").innerHTML='';//pedimos que se limpien todos los registros
     var ref = firebase.database().ref('Mascotas');
-/**   
-   ref.on('value', function(snapshot) {
-        snapshot.forEach(row=>{
-            printRow(row.val());
-        })
-    });
- */
    
     ref.on("child_added", function(snapshot) {
         printRow(snapshot.val());
     });
 
 }
-
+//funcion que nos permite ir insertando los datos
 function printRow(mascota){
     
     if(mascota!=null){
         var table = document.getElementById("Table1"); 
 
-        //creamos un nuevo elemento en la tabla en la ultima posicion
+        //se crea un nuevo elemento en la tabla en la ultima posicion aunque con Firebase se ordena automaticamente por el id
         var row = table.insertRow(-1);
 
-        //Insertamos cada una de las celdas/columnas del registro
-        var cell1 = row.insertCell(0);
-        var cell2 = row.insertCell(1);
-        var cell3 = row.insertCell(2);
-        var cell4 = row.insertCell(3);
-        var cell5 = row.insertCell(4);
-        var cell6 = row.insertCell(5);
-        var cell7 = row.insertCell(6);
-        var cell8 = row.insertCell(7);
-        var cell9 = row.insertCell(8);
-        var cell10 = row.insertCell(9);
+        //Se inserta cada celda que sera necesaria
+        var cell1 = row.insertCell(0);//Se establece la celda del id
+        var cell2 = row.insertCell(1);//Se establece la celda del nombre de la mascota
+        var cell3 = row.insertCell(2);//Se establece la celda de la edad
+        var cell4 = row.insertCell(3);//Se establece la celda de la especie
+        var cell5 = row.insertCell(4);//Se establece la celda de la raza
+        var cell6 = row.insertCell(5);//Se establece la celda del diagnostico
+        var cell7 = row.insertCell(6);//Se establece la celda del nombre del dueño
+        var cell8 = row.insertCell(7);//Se establece la celda del numero de telefono
+        var cell9 = row.insertCell(8);//Se establece la celda del boton eliminar
+        var cell10 = row.insertCell(9);//Se establece la celda del boton modificar
 
-        //Agregamos la informacion a cada una de las columnas del registro
+        //Agregamos la informacion de la mascota y su dueño en cada columna que le corresponde
         cell1.innerHTML = mascota.id;
         cell2.innerHTML = mascota.nombremascota; 
         cell3.innerHTML = mascota.edad;
@@ -127,31 +114,35 @@ function printRow(mascota){
         cell6.innerHTML = mascota.diagnostico;
         cell7.innerHTML = mascota.nombredueño;
         cell8.innerHTML = mascota.telefono;
+        //En cada boton se llama una funcion a la cual le mandamos el id 
         cell9.innerHTML = `<button type="button" class="btn btn-danger" onClick="deleteR(${mascota.id})">Eliminar</button>`;
         cell10.innerHTML = '<button type="button" class="btn btn-success" onClick="seekR('+mascota.id+')">Modificar</button>';
     }
 }
-
+//Funcion que nos permite eliminar un registro
 function deleteR(id){
+    //Busca el id en la base de datos y con el set en null elimina el registro
     firebase.database().ref('Mascotas/' + id).set(null).then(() => {
       read();
     }).then(()=>{
        swal("Listo!", "Eliminado correctamente", "success");
     });
 }
-
+//Funcion que nos permite buscar por medio del id
 function seekR(id){
     var ref = firebase.database().ref('Mascotas/' + id);
+
     ref.on('value', function(snapshot) {
-      updateR(snapshot.val());
+      updateR(snapshot.val());//Funcion que nos permite actualizar el registro mediante el envio de la informacion de la mascota
     });
 }
-
+//Funcion para actualizar el registro
 function updateR(mascota){
     if(mascota!=null)
     {
+        //actualiza cada uno de los campos
         document.getElementById("Input0").value=mascota.id;
-        document.getElementById("Input0").disabled = true;
+        document.getElementById("Input0").disabled = true;//Se impide que el id de la mascota se actualize
         document.getElementById("Input1").value=mascota.nombremascota;
         document.getElementById("Input2").value=mascota.edad;
         document.getElementById("Input3").value=mascota.especie;
@@ -163,7 +154,7 @@ function updateR(mascota){
 }
 
 
-//Para consulta de carrera
+//Funcion para consultar por medio de la especie
 function readQ(){
     document.getElementById("Table2").innerHTML='';
     var consulta = document.getElementById("Input8").value;
@@ -174,26 +165,25 @@ function readQ(){
     });
 
 }
-
-
+//Funcion para insertar los datos pero ahora en la tabla 2
 function printRowQ(mascota){
 
     var table = document.getElementById("Table2"); 
     
-    //creamos un nuevo elemento en la tabla en la ultima posicion
+    //se crea un nuevo elemento en la tabla en la ultima posicion aunque con Firebase se ordena automaticamente por el id
     var row = table.insertRow(-1);
 
-    //Insertamos cada una de las celdas/columnas del registro
-    var cell1 = row.insertCell(0);
-    var cell2 = row.insertCell(1);
-    var cell3 = row.insertCell(2);
-    var cell4 = row.insertCell(3);
-    var cell5 = row.insertCell(4);
-    var cell6 = row.insertCell(5);
-    var cell7 = row.insertCell(6);
-    var cell8 = row.insertCell(7);
+    //Se inserta cada celda que sera necesaria
+    var cell1 = row.insertCell(0);//Se establece la celda del id
+    var cell2 = row.insertCell(1);//Se establece la celda del nombre de la mascota
+    var cell3 = row.insertCell(2);//Se establece la celda de la edad
+    var cell4 = row.insertCell(3);//Se establece la celda de la especie
+    var cell5 = row.insertCell(4);//Se establece la celda de la raza
+    var cell6 = row.insertCell(5);//Se establece la celda del diagnostico
+    var cell7 = row.insertCell(6);//Se establece la celda del nombre del dueño
+    var cell8 = row.insertCell(7);//Se establece la celda del numero de telefono
 
-    //Agregamos la informacion a cada una de las columnas del registro
+    //Agregamos la informacion de la mascota y su dueño en cada columna que le corresponde
     cell1.innerHTML = mascota.id;
     cell2.innerHTML = mascota.nombremascota; 
     cell3.innerHTML = mascota.edad;
