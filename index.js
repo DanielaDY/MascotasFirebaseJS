@@ -2,8 +2,9 @@
 Veterinaria con Firebase
 
 Integrantes:
-De la Cruz Yamahoka Daniela 19211624
+
 García Arellano Aracely 19211642
+Gonzalez Guzman Maria Jose 19211650
 
 */
 var firebaseConfig = {
